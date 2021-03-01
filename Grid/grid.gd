@@ -13,6 +13,9 @@ var new_position = Vector2(0,0)
 
 # Piece Stuff
 var possible_pieces = [
+	load("res://Pieces/Red.tscn"),
+	load("res://Pieces/Green.tscn"),
+	load("res://Pieces/Blue.tscn")
 ]
 
 var all_pieces
@@ -47,14 +50,14 @@ func setup_board():
 func generate_pieces():
 	for i in width:
 		for j in height:
-			var piece_to_use = round(rand_range(0, possible_pieces.size()))
+			var piece_to_use = floor(rand_range(0, possible_pieces.size()))
 			if piece_to_use == 6:
 				piece_to_use = 5
-			var piece = possible_pieces[piece_to_use].instance()
+			piece = possible_pieces[piece_to_use].instance()
 			
 			var loops = 0
 			while check_for_matches(i,j, piece.color) && loops < 100:
-				piece_to_use = round(rand_range(0, possible_pieces.size()))
+				piece_to_use = floor(rand_range(0, possible_pieces.size()))
 				if piece_to_use == 6:
 					piece_to_use = 5
 				piece = possible_pieces[piece_to_use].instance()
@@ -103,18 +106,18 @@ func swap_pieces(column, row, direction):
 	first_piece.move_piece(Vector2(direction.x * offset, direction.y * -offset))
 	other_piece.move_piece(Vector2(direction.x * -offset, direction.y * offset))
 
-func touch_difference(first_touch, final_touch):
-	var difference = final_touch - first_touch
+func touch_difference(touch_1, touch_2):
+	var difference = touch_2 - touch_1
 	if(abs(difference.x) > abs(difference.y)):
 		if(difference.x > 0):
-			swap_pieces(first_touch.x, first_touch.y, Vector2(1, 0))
+			swap_pieces(touch_1.x, touch_1.y, Vector2(1, 0))
 		elif(difference.x < 0):
-			swap_pieces(first_touch.x, first_touch.y, Vector2(-1, 0))
+			swap_pieces(touch_1.x, touch_1.y, Vector2(-1, 0))
 	elif(abs(difference.y) > abs(difference.x)):
 		if(difference.y > 0):
-			swap_pieces(first_touch.x, first_touch.y, Vector2(0, 1))
+			swap_pieces(touch_1.x, touch_1.y, Vector2(0, 1))
 		elif(difference.y < 0):
-			swap_pieces(first_touch.x, first_touch.y, Vector2(0, -1))
+			swap_pieces(touch_1.x, touch_1.y, Vector2(0, -1))
 
 func _process(_delta):
 	touch_input()
@@ -140,13 +143,61 @@ func find_matches():
 					all_pieces[i][j - 1].is_matched = true
 					all_pieces[i][j + 1].is_matched = true
 					all_pieces[i][j].is_matched = true
+	for i in width:
+		for j in height:
+			if all_pieces[i][j].is_matched:
+				all_pieces[i][j].is_counted = false
+			else:
+				all_pieces[i][j].is_counted = true
+	for i in width:
+		for j in height:
+			var count_matched = 0
+			if all_pieces[i][j].is_matched and not all_pieces[i][j].is_counted:
+				count_matched += check_across(i, j, all_pieces[i][j].color);
+				mark_across(i,j, all_pieces[i][j].color)
+				mark_down(i,j, all_pieces[i][j].color)
+				Global.change_score(Global.scores[count_matched])
 	destroy_matched()
+
+func check_across(i,j,value):
+	if i < 0 or i >= width or j < 0 or j >= height: return 0
+	if not all_pieces[i][j].is_matched or all_pieces[i][j].is_counted: return 0
+	var count = 0
+	if all_pieces[i][j].color != value: return 0
+	else: count += 1
+	count += check_across(i + 1, j, value)
+	count += check_down(i, j + 1, value)
+	return count
+
+func check_down(i,j,value):
+	if i < 0 or i >= width or j < 0 or j >= height: return 0
+	if not all_pieces[i][j].is_matched or all_pieces[i][j].is_counted: return 0
+	var count = 0
+	if all_pieces[i][j].color != value: return 0
+	else: count += 1
+	count += check_down(i, j + 1, value)
+	return count
+
+func mark_across(i,j,value):
+	if i < 0 or i >= width or j < 0 or j >= height: return
+	if not all_pieces[i][j].is_matched or all_pieces[i][j].is_counted: return
+	if all_pieces[i][j].color != value: return
+	all_pieces[i][j].is_counted = true
+	mark_across(i + 1, j, value)
+	mark_down(i, j + 1, value)
+
+func mark_down(i,j,value):
+	if i < 0 or i >= width or j < 0 or j >= height: return
+	if not all_pieces[i][j].is_matched or all_pieces[i][j].is_counted: return
+	if all_pieces[i][j].color != value: return
+	all_pieces[i][j].is_counted = true
+	mark_down(i, j + 1, value)
 
 func destroy_matched():
 	for i in width:
 		for j in height:
 			if(all_pieces[i][j].is_matched):
-				all_pieces[i][j].queue_free()
+				all_pieces[i][j].die()
 				all_pieces[i][j] = null
 	collapse_columns()
 
@@ -157,7 +208,6 @@ func collapse_columns():
 				for k in range(j + 1, height):
 					if(all_pieces[i][k] != null):
 						all_pieces[i][j] = all_pieces[i][k]
-						#all_pieces[i][k].position = Vector2(i * offset + xStart, -j * offset + yStart)
 						all_pieces[i][k].move_piece(Vector2(0, (k-j) * offset))
 						all_pieces[i][k] = null
 						break
@@ -166,14 +216,14 @@ func refill_columns():
 	for i in width:
 		for j in height:
 			if all_pieces[i][j] == null:
-				var piece_to_use = round(rand_range(0, possible_pieces.size()))
+				var piece_to_use = floor(rand_range(0, possible_pieces.size()))
 				if piece_to_use == 6:
 					piece_to_use = 5
 				piece = possible_pieces[piece_to_use].instance()
 				
 				var loops = 0
 				while check_for_matches(i,j, piece.color) && loops < 100:
-					piece_to_use = round(rand_range(0, possible_pieces.size()))
+					piece_to_use = floor(rand_range(0, possible_pieces.size()))
 					if piece_to_use == 6:
 						piece_to_use = 5
 					piece = possible_pieces[piece_to_use].instance()
@@ -188,13 +238,15 @@ func touch_input():
 		if(is_in_grid(pixel_to_grid(get_global_mouse_position()))):
 			controlling = true
 			first_touch = pixel_to_grid(get_global_mouse_position())
+			all_pieces[first_touch.x][first_touch.y].selected = true
 	if(Input.is_action_just_released("ui_touch") && controlling):
 		if(is_in_grid(pixel_to_grid(get_global_mouse_position()))):
 			controlling = false
 			final_touch = pixel_to_grid(get_global_mouse_position())
+			all_pieces[first_touch.x][first_touch.y].selected = false
 			touch_difference(first_touch, final_touch)
 
-func move_piece(piece, position_change):
-	piece.position += position_change
+func move_piece(p, position_change):
+	p.position += position_change
 
 
