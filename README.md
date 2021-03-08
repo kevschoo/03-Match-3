@@ -4,7 +4,7 @@
 Third project of C220. 3/8/2020
 
 Description:
-This is a simple match 3 in a row game. There are 4 types of tiles in total. Get 1000 score to get to level 2 and 1000 more to see what ores you mined. 
+This is a simple match 3 in a row game. There are 4 types of tiles in total. Get 500 score to get to level 2 and 500 more to see what ores you mined. 
 
 Feature List And Changes:
 1. New Game Logo [GEMiner Match]
@@ -18,7 +18,7 @@ Feature List And Changes:
 9. Added Shaders.
 10. Changed Score icon and end of game icon.
 11. Added background music.
-12. Changed Scoring mechanics. 1000 points to reach level 2. 1000 more points to end the game. End game screen tells you what ores you mined.
+12. Changed Scoring mechanics. 500 points to reach level 2. 500 more points to end the game. End game screen tells you what ores you mined.
 13. Changed cursor to a pickaxe.
 14. Level 2 adds an additional piece to the board to match.
 
