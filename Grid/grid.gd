@@ -1,5 +1,5 @@
 extends Node2D
-
+onready var global = get_node("/root/Global")
 # Board Variables
 export (int) var width 
 export (int) var height 
@@ -12,11 +12,14 @@ var piece = null
 var new_position = Vector2(0,0)
 
 # Piece Stuff
+
 var possible_pieces = [
 	load("res://Pieces/Red.tscn"),
 	load("res://Pieces/Green.tscn"),
-	load("res://Pieces/Blue.tscn")
-]
+	load("res://Pieces/Blue.tscn"),
+	]
+
+
 
 var all_pieces
 
@@ -31,6 +34,8 @@ func _ready():
 	all_pieces = make_array()
 	setup_board()
 	generate_pieces()
+	if global.onGame2 == true:
+		possible_pieces.append(load("res://Pieces/Piece.tscn"))
 
 func make_array():
 	var matrix = [ ]
@@ -46,6 +51,7 @@ func setup_board():
 			var b = background.instance()
 			add_child(b)
 			b.position = Vector2((xStart + (i * offset)), (yStart - (j * offset)))
+
 
 func generate_pieces():
 	for i in width:
@@ -66,6 +72,8 @@ func generate_pieces():
 			add_child(piece)
 			piece.position = Vector2(xStart + i * offset, yStart - j * offset)
 			all_pieces[i][j] = piece
+
+
 
 func check_for_matches(column, row, color):
 	#Check Left
@@ -105,6 +113,7 @@ func swap_pieces(column, row, direction):
 	all_pieces[column][row] = other_piece
 	first_piece.move_piece(Vector2(direction.x * offset, direction.y * -offset))
 	other_piece.move_piece(Vector2(direction.x * -offset, direction.y * offset))
+	
 
 func touch_difference(touch_1, touch_2):
 	var difference = touch_2 - touch_1
@@ -200,6 +209,7 @@ func destroy_matched():
 				all_pieces[i][j].die()
 				all_pieces[i][j] = null
 	collapse_columns()
+	
 
 func collapse_columns():
 	for i in width:
@@ -233,20 +243,28 @@ func refill_columns():
 				piece.position = Vector2(xStart + i * offset, yStart - j * offset)
 				all_pieces[i][j] = piece
 
+
 func touch_input():
 	if(Input.is_action_just_pressed("ui_touch")):
 		if(is_in_grid(pixel_to_grid(get_global_mouse_position()))):
 			controlling = true
 			first_touch = pixel_to_grid(get_global_mouse_position())
 			all_pieces[first_touch.x][first_touch.y].selected = true
+			$AudioStreamPlayer.playing = true
 	if(Input.is_action_just_released("ui_touch") && controlling):
 		if(is_in_grid(pixel_to_grid(get_global_mouse_position()))):
 			controlling = false
 			final_touch = pixel_to_grid(get_global_mouse_position())
 			all_pieces[first_touch.x][first_touch.y].selected = false
 			touch_difference(first_touch, final_touch)
+			$AudioStreamPlayer.stop()
+			
 
 func move_piece(p, position_change):
 	p.position += position_change
 
 
+
+
+func _on_AudioStreamPlayer_finished():
+	$AudioStreamPlayer.stop()

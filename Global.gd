@@ -1,5 +1,10 @@
 extends Node
 
+var onGame2 = false
+var blue = 0
+var green = 0
+var red = 0
+var white = 0
 var score = 0
 signal changed
 var scores = {
@@ -22,3 +27,13 @@ func _unhandled_input(event):
 func change_score(s):
 	score += s
 	emit_signal("changed")
+	change_scene()
+
+func change_scene():
+	if score >= 500 && onGame2 == false:
+		var _target = get_tree().change_scene("res://Game2.tscn")
+		print("Level 2")
+		onGame2 = true
+	if score >= 1000 && onGame2 == true:
+		var _target = get_tree().change_scene("res://UI/EndGame.tscn")
+		print("Level 2")
