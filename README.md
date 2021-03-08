@@ -8,18 +8,19 @@ This is a simple match 3 in a row game. There are 4 types of tiles in total. Get
 
 Feature List And Changes:
 1. New Game Logo [GEMiner Match]
-2. New Game Sprites [Diamond, Red Crystal, Gem Ore, White Stone]
-3. Clicking a sprite generates randomly sized particles.
-4. Sound when clicking a sprite.
-5. Blocks fall when matched.
-6. Blocks may spin when matched.
-7. New Stone background.
-8. Added Shaders.
-9. Changed Score icon and end of game icon.
-10. Added background music.
-11. Changed Scoring mechanics. 1000 points to reach level 2. 1000 more points to end the game. End game screen tells you what ores you mined.
-12. Changed cursor to a pickaxe.
-13. Level 2 adds an additional piece to the board to match.
+2. Logo and end game text drop into their centered location. Logo will slowly hop up and down.
+3. New Game Sprites [Diamond, Red Crystal, Gem Ore, White Stone]
+4. Clicking a sprite generates randomly sized particles.
+5. Sound when clicking a sprite.
+6. Blocks fall when matched.
+7. Blocks may spin when matched.
+8. New Stone background.
+9. Added Shaders.
+10. Changed Score icon and end of game icon.
+11. Added background music.
+12. Changed Scoring mechanics. 1000 points to reach level 2. 1000 more points to end the game. End game screen tells you what ores you mined.
+13. Changed cursor to a pickaxe.
+14. Level 2 adds an additional piece to the board to match.
 
 ## Implementation
 Built using Godot 3.2.3
